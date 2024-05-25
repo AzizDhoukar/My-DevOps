@@ -4,10 +4,12 @@ resource "aws_instance" "cerberus" {
   user_data     = file("./bash.sh") //the code in bash.sh will be executed on the EC2 instance, but it's better to use an ami with the necessary software already installed
   key_name = aws_key_pair.cerberus-key.key_name
 }
+
 resource "aws_key_pair" "cerberus-key" {
   key_name   = "cerberus"
   public_key = file(".ssh/cerberus.pub")// This file must exist and contain a valid public key
 }
+
 resource "aws_eip" "eip" { 
   domain           = "vpc"
   instance = aws_instance.cerberus.id 
@@ -15,16 +17,4 @@ resource "aws_eip" "eip" {
   provisioner "local-exec" { // This provisioner will run on the machine running Terraform, not on the EC2 instance
     command = "echo ${aws_eip.eip.public_dns} >> /root/cerberus_public_dns.txt"
   }
-}
-
-
-variable "ami" {
-  default = "ami-06178cf087598769c" // This is the AMI for Ubuntu 18.04 LTS
-}
-variable "instance_type" {
-  default = "t2.micro"
-
-}
-variable "region" {
-  default = "eu-central-1"
 }
