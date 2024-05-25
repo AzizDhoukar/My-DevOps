@@ -11,7 +11,7 @@ resource "aws_key_pair" "cerberus-key" {
 }
 
 resource "aws_eip" "eip" { 
-  domain           = "vpc"
+  domain         = "vpc"
   instance = aws_instance.cerberus.id 
   
   provisioner "local-exec" { // This provisioner will run on the machine running Terraform, not on the EC2 instance

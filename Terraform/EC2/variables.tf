@@ -1,5 +1,5 @@
 variable "ami" {
-  default = "ami-06178cf087598769c" // This is the AMI for Ubuntu 18.04 LTS
+  default = "ami-0f3d898ae42d775a6" // This is the AMI for Amazon Linux 2023
 }
 variable "instance_type" {
   default = "t2.micro"
