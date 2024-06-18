@@ -5,13 +5,14 @@ resource "aws_key_pair" "jenkins_key" {
 }
 
 # Fetch the latest Amazon Linux Image (AMI) owned by AWS
-data "aws_ami" "latest-amazon-linux-image" {
+data "aws_ami" "ubuntu-latest" {
   most_recent = true
-  owners      = ["amazon"]
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
-  }
+  
+    owners = ["099720109477"]
+    filter {
+      name   = "name"
+      values = ["ubuntu/images/hvm-ssd/*"]
+    }
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
@@ -21,7 +22,7 @@ data "aws_ami" "latest-amazon-linux-image" {
 # Define the Jenkins server
 resource "aws_instance" "jenkins-server" {
   # Specify the AMI id defined above
-  ami                         = data.aws_ami.latest-amazon-linux-image.id
+  ami                         = data.aws_ami.ubuntu-latest.id
   instance_type               = var.instance_type
   key_name                    = aws_key_pair.jenkins_key.key_name
   subnet_id                   = aws_subnet.jenkins-subnet-1.id
@@ -29,7 +30,7 @@ resource "aws_instance" "jenkins-server" {
   availability_zone           = var.availability_zone
   associate_public_ip_address = true
   # Specify a script to be executed when the instance is launched
-  user_data                   = file("bash.sh")
+  user_data                   = file("ubuntu.sh")
   tags = {
     Name = "${var.env_prefix}-server"
   }
