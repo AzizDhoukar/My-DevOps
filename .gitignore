@@ -33,3 +33,4 @@
 
 # SSH Keys
 **/*.pem
+**/*.pub
