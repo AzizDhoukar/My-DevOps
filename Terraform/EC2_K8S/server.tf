@@ -1,7 +1,7 @@
 # The key is in the local machine
 resource "aws_key_pair" "K8S_key" {
   key_name   = "K8S_key"
-  public_key = file("K8S_key.pub")  # Ensure this path is correct and the file exists
+  public_key = file("C:/Users/ZD/.ssh/K8S_key.pub")  # Ensure this path is correct and the file exists
 }
 
 # Fetch the latest Amazon Linux Image (AMI) owned by AWS

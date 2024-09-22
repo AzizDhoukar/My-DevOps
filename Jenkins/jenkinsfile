@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Install Bundler') {
+            steps {
+                sh 'gem install bundler'
+            }
+        }
+        stage ('Build') {
+            steps {
+                
+                git branch: 'master', url: 'https://github.com/reiseburo/hermann'
+                
+                // install required bundles
+                sh 'bundle install'
+                
+                // build and run tests with coverage
+                sh 'bundle exec rake build spec'
+                
+                // Archive the built artifacts
+                archive (includes: 'pkg/*.gem')
+            }   
+        }
+    }
+}
