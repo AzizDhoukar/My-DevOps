@@ -30,8 +30,24 @@ resource "aws_instance" "jenkins-server" {
   availability_zone           = var.availability_zone
   associate_public_ip_address = true
   # Specify a script to be executed when the instance is launched
-  user_data                   = file("ubuntu.sh")
+  user_data                   = file("jenkins_server.sh")
   tags = {
     Name = "${var.env_prefix}-server"
+  }
+}
+
+resource "aws_instance" "jenkins-node" {
+  # Specify the AMI id defined above
+  ami                         = data.aws_ami.ubuntu-latest.id
+  instance_type               = var.instance_type
+  key_name                    = aws_key_pair.jenkins_key.key_name
+  subnet_id                   = aws_subnet.jenkins-subnet-1.id
+  vpc_security_group_ids      = [aws_default_security_group.jenkins-sg.id]
+  availability_zone           = var.availability_zone
+  associate_public_ip_address = true
+  # Specify a script to be executed when the instance is launched
+  user_data                   = file("jenkins_node.sh")
+  tags = {
+    Name = "${var.env_prefix}-node"
   }
 }
