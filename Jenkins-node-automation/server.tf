@@ -17,6 +17,10 @@ data "aws_ami" "ubuntu-latest" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
 }
 
 # Define the Jenkins server

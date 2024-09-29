@@ -24,9 +24,27 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
+data "aws_ami" "ubuntu-latest" {
+  most_recent = true
+  
+    owners = ["099720109477"]
+    filter {
+      name   = "name"
+      values = ["ubuntu/images/hvm-ssd/*"]
+    }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+}
+
 # Create an EC2 instance
 resource "aws_instance" "cerberus" {
-  ami           = var.ami  # Replace with your desired AMI ID
+  ami           = data.aws_ami.ubuntu-latest.id  # Replace with your desired AMI ID
   instance_type = var.instance_type  # Replace with your desired instance type
   key_name      = aws_key_pair.my_key.key_name
   security_groups = [aws_security_group.allow_ssh.name]
