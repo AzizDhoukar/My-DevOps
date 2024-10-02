@@ -1,8 +1,7 @@
 ---
-- name: Install Jenkins Server on Local Machine
-  hosts: localhost
+- name: Install Jenkins Server
+  hosts: jenkins_master
   become: yes
-  connection: local
 
   tasks:
     - name: Update APT and install Docker
