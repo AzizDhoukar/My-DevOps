@@ -8,11 +8,11 @@ resource "aws_key_pair" "jenkins_key" {
 data "aws_ami" "ubuntu-latest" {
   most_recent = true
   
-    owners = ["099720109477"]
-    filter {
-      name   = "name"
-      values = ["ubuntu/images/hvm-ssd/*"]
-    }
+  owners = ["099720109477"]
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/*"]
+  }
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
@@ -23,7 +23,7 @@ data "aws_ami" "ubuntu-latest" {
   }
 }
 
-# Define the Jenkins server
+# Define the Jenkins servers
 resource "aws_instance" "jenkins-server" {
   # Specify the AMI id defined above
   ami                         = data.aws_ami.ubuntu-latest.id

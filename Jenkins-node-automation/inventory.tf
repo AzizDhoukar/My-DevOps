@@ -4,7 +4,7 @@ resource "local_file" "inventory" {
   content = <<EOF
 [all:vars]
 ansible_user=ubuntu
-ansible_ssh_private_key_file=~/.ssh/${aws_key_pair.jenkins_key.key_name}
+ansible_ssh_private_key_file=~/.ssh/${aws_key_pair.jenkins_key.key_name}.pem
 
 [jenkins_master]
 master ansible_host=${aws_instance.jenkins-server.public_ip}
