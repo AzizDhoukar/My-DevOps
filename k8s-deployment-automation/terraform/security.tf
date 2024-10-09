@@ -1,5 +1,5 @@
-# Security Group of the Jenkins server
-resource "aws_default_security_group" "jenkins-sg" {
+# Security Group of the server
+resource "aws_default_security_group" "k8s-sg" {
   vpc_id = aws_vpc.my-vpc.id  
   # Allow inbound TCP traffic on port 22 (SSH) from any source 
   ingress {
@@ -10,7 +10,7 @@ resource "aws_default_security_group" "jenkins-sg" {
     ipv6_cidr_blocks = ["::/0"]
   }
   
-  # Allow inbound TCP traffic on port 8080 (Jenkins) from any source.
+  # Allow inbound TCP traffic on port 8080 from any source.
   ingress {
     from_port   = 8080
     to_port     = 8080

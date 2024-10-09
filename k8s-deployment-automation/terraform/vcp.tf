@@ -5,7 +5,7 @@ resource "aws_vpc" "my-vpc" {
   }
 }
 
-resource "aws_subnet" "jenkins-subnet-1" {
+resource "aws_subnet" "k8s-subnet-1" {
   vpc_id            = aws_vpc.my-vpc.id
   cidr_block        = var.subnet_cidr_block
   availability_zone = var.availability_zone
