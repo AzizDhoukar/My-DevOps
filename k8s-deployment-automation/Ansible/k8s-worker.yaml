@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: k8s-workers
   become: true
   tasks:
     - name: Install dependencies
@@ -12,46 +12,25 @@
         state: present
         update_cache: yes
 
-    - name: Add Docker GPG key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-
-    - name: Add Docker repository
-      apt_repository:
-        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
-        state: present
-
     - name: Install Docker
       apt:
-        name: docker-ce
+        name: docker.io
         state: present
-        update_cache: yes
 
     - name: Enable and start Docker
       systemd:
         name: docker
-        enabled: true
         state: started
+        enabled: true
 
-    - name: Add Kubernetes GPG key
-      apt_key:
-        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-        state: present
-
-    - name: Add Kubernetes repository
-      apt_repository:
-        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
-        state: present
-
-    - name: Install Kubernetes packages (kubeadm, kubelet, kubectl)
+    - name: Install kubeadm, kubelet, and kubectl
       apt:
-        name:
-          - kubeadm
-          - kubelet
-          - kubectl
+        name: "{{ item }}"
         state: present
-        update_cache: yes
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
 
     - name: Hold the Kubernetes packages at the current version
       apt:
@@ -61,8 +40,6 @@
           - kubectl
         state: held
 
-- hosts: worker
-  become: true
-  tasks:
-    - name: Join worker node to the Kubernetes cluster
-      command: "{{ hostvars['master-node']['join_command'].stdout }}"
+    - name: Join worker nodes to the cluster
+      command: "{{ hostvars['k8s-master']['kubeadm_output']['stdout_lines'][0] }}"
+      when: "'kubeadm join' in hostvars['k8s-master']['kubeadm_output']['stdout']"

@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: k8s-master
   become: true
   tasks:
     - name: Install dependencies
@@ -12,46 +12,33 @@
         state: present
         update_cache: yes
 
-    - name: Add Docker GPG key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-
-    - name: Add Docker repository
-      apt_repository:
-        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
-        state: present
-
-    - name: Install Docker
+    - name: Update APT and install Docker
       apt:
-        name: docker-ce
-        state: present
         update_cache: yes
+        name: docker.io
+        state: latest
 
-    - name: Enable and start Docker
-      systemd:
-        name: docker
-        enabled: true
-        state: started
-
-    - name: Add Kubernetes GPG key
+    - name: making the keyrings folder
+      command: mkdir -p /etc/apt/keyrings
+      
+    - name: Add Kubernetes apt key
       apt_key:
-        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        url: https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
         state: present
 
     - name: Add Kubernetes repository
       apt_repository:
-        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+        repo: "deb https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
         state: present
 
-    - name: Install Kubernetes packages (kubeadm, kubelet, kubectl)
+    - name: Install kubeadm, kubelet, and kubectl
       apt:
-        name:
-          - kubeadm
-          - kubelet
-          - kubectl
+        name: "{{ item }}"
         state: present
-        update_cache: yes
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
 
     - name: Hold the Kubernetes packages at the current version
       apt:
@@ -59,23 +46,23 @@
           - kubeadm
           - kubelet
           - kubectl
-        state: held
+        state: fixed
 
-- hosts: master
-  become: true
-  tasks:
+#    - name: Disable swap they dont work on localhost for somereason
+#      command: swapoff -a
+#      when: ansible_swaptotal_mb > 0
+
+    - name: Remove swap from fstab
+      replace:
+        path: /etc/fstab
+        regexp: '^.*\bswap\b.*$'
+        replace: ''
+
     - name: Initialize Kubernetes cluster
       command: kubeadm init --pod-network-cidr=10.244.0.0/16
       register: k8s_init_output
-
-    - name: Create .kube directory for user
-      file:
-        path: /home/{{ ansible_user }}/.kube
-        state: directory
-        mode: '0755'
-        owner: "{{ ansible_user }}"
-
-    - name: Copy kubeconfig
+  
+    - name: Set up kubectl for the current user
       command: "{{ item }}"
       with_items:
         - mkdir -p /home/{{ ansible_user }}/.kube
@@ -83,9 +70,5 @@
         - chown $(id -u):$(id -g) /home/{{ ansible_user }}/.kube/config
 
     - name: Install Calico network plugin
-      command: kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
-
-    - name: Get Kubernetes join command
-      shell: "kubeadm token create --print-join-command"
-      register: join_command
-      delegate_to: master-node
+      command: kubectl apply -f https://docs.projectcalico.org/v3.25/manifests/calico.yaml
+      when: "'calico' in kubeadm_output.stdout"
