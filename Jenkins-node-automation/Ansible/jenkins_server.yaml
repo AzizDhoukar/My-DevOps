@@ -31,3 +31,7 @@
     service: 
       name: jenkins 
       enabled: yes 
+      
+  - name: print Jenkins admin password
+    debug:
+      msg: "Jenkins Initial Admin Password: {{ jenkins_admin_password.stdout }}"
