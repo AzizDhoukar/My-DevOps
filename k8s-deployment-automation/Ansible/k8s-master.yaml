@@ -48,9 +48,9 @@
           - kubectl
         state: fixed
 
-#    - name: Disable swap they dont work on localhost for somereason
-#      command: swapoff -a
-#      when: ansible_swaptotal_mb > 0
+    - name: Disable swap they dont work on localhost for somereason
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
 
     - name: Remove swap from fstab
       replace:
