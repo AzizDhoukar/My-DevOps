@@ -48,7 +48,7 @@
           - kubectl
         state: fixed
 
-    - name: Disable swap they dont work on localhost for somereason
+    - name: Disable swap
       command: swapoff -a
       when: ansible_swaptotal_mb > 0
 
@@ -58,16 +58,41 @@
         regexp: '^.*\bswap\b.*$'
         replace: ''
 
+    - name: Check if /etc/kubernetes exists
+      stat:
+        path: /etc/kubernetes
+      register: kubernetes_dir
+
     - name: Initialize Kubernetes cluster
       command: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=Mem --ignore-preflight-errors=NumCPU
-      register: k8s_init_output
-  
+      when: not kubernetes_dir.stat.exists
+
+    - name: copying the token
+      command: kubeadm token create --print-join-command
+      register: k8s_token
+
+    - name: Write token to a file
+      copy:
+        content: "{{ k8s_token.stdout }}"
+        dest: /tmp/k8s_token.txt
+
+    - name: Fetch the token file to the local machine
+      fetch:
+        src: /tmp/k8s_token.txt
+        dest: ./
+        flat: yes
+
+    - name: Remove temporary token file from remote machine
+      file:
+        path: /tmp/k8s_token.txt
+        state: absent
+
     - name: Set up kubectl for the current user
       command: "{{ item }}"
       with_items:
         - sudo mkdir -p /home/{{ ansible_user }}/.kube
         - sudo cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
-        - sudo chown $(id -u):$(id -g) /home/{{ ansible_user }}/.kube/config
+        - chown $(id -u):$(id -g) /home/{{ ansible_user }}/.kube/config
 
     - name: Install Calico network plugin
       command: kubectl apply -f https://docs.projectcalico.org/v3.25/manifests/calico.yaml

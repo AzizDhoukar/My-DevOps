@@ -9,19 +9,27 @@
           - ca-certificates
           - curl
           - software-properties-common
+          - socat
         state: present
         update_cache: yes
 
-    - name: Install Docker
+    - name: install Docker
       apt:
         name: docker.io
+        state: latest
+
+    - name: making the keyrings folder
+      command: mkdir -p /etc/apt/keyrings
+      
+    - name: Add Kubernetes apt key
+      apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
         state: present
 
-    - name: Enable and start Docker
-      systemd:
-        name: docker
-        state: started
-        enabled: true
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: "deb https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
+        state: present
 
     - name: Install kubeadm, kubelet, and kubectl
       apt:
@@ -38,8 +46,15 @@
           - kubeadm
           - kubelet
           - kubectl
-        state: held
+        state: fixed
 
-    - name: Join worker nodes to the cluster
-      command: "{{ hostvars['k8s-master']['kubeadm_output']['stdout_lines'][0] }}"
-      when: "'kubeadm join' in hostvars['k8s-master']['kubeadm_output']['stdout']"
+    - name: Read token output from local file
+      set_fact:
+        token: "{{ lookup('file', 'k8s_token.txt') }}"
+
+    - name: Display the token
+      debug:
+        msg: "The token is: {{ token }}"
+
+    - name: Connect to the cluster
+      command: sudo {{ token }}
