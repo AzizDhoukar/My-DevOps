@@ -59,15 +59,15 @@
         replace: ''
 
     - name: Initialize Kubernetes cluster
-      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      command: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=Mem --ignore-preflight-errors=NumCPU
       register: k8s_init_output
   
     - name: Set up kubectl for the current user
       command: "{{ item }}"
       with_items:
-        - mkdir -p /home/{{ ansible_user }}/.kube
-        - cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
-        - chown $(id -u):$(id -g) /home/{{ ansible_user }}/.kube/config
+        - sudo mkdir -p /home/{{ ansible_user }}/.kube
+        - sudo cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
+        - sudo chown $(id -u):$(id -g) /home/{{ ansible_user }}/.kube/config
 
     - name: Install Calico network plugin
       command: kubectl apply -f https://docs.projectcalico.org/v3.25/manifests/calico.yaml
