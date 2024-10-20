@@ -1,0 +1,99 @@
+---
+- hosts: k8s-master
+  become: true
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Update APT and install Docker
+      apt:
+        update_cache: yes
+        name: docker.io
+        state: latest
+
+    - name: making the keyrings folder
+      command: mkdir -p /etc/apt/keyrings
+      
+    - name: Add Kubernetes apt key
+      apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
+        state: present
+
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: "deb https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
+        state: present
+
+    - name: Install kubeadm, kubelet, and kubectl
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
+
+    - name: Hold the Kubernetes packages at the current version
+      apt:
+        name:
+          - kubeadm
+          - kubelet
+          - kubectl
+        state: fixed
+
+    - name: Disable swap
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+
+    - name: Remove swap from fstab
+      replace:
+        path: /etc/fstab
+        regexp: '^.*\bswap\b.*$'
+        replace: ''
+
+    - name: Check if /etc/kubernetes/admin.conf exists
+      stat:
+        path: /etc/kubernetes/admin.conf
+      register: kubernetes_dir
+
+    - name: Initialize Kubernetes cluster
+      command: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=Mem --ignore-preflight-errors=NumCPU
+      when: not kubernetes_dir.stat.exists
+
+    - name: copying the token
+      command: kubeadm token create --print-join-command
+      register: k8s_token
+
+    - name: Write token to a file
+      copy:
+        content: "{{ k8s_token.stdout }}"
+        dest: /tmp/k8s_token.txt
+
+    - name: Fetch the token file to the local machine
+      fetch:
+        src: /tmp/k8s_token.txt
+        dest: ./
+        flat: yes
+
+    - name: Remove temporary token file from remote machine
+      file:
+        path: /tmp/k8s_token.txt
+        state: absent
+
+    - name: Set up kubectl for the current user
+      command: "{{ item }}"
+      with_items:
+        - sudo mkdir -p /home/{{ ansible_user }}/.kube
+        - sudo cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
+        - sudo chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
+
+    - name: Install Calico network plugin
+      command: kubectl apply -f https://docs.projectcalico.org/v3.25/manifests/calico.yaml
+      when: "'calico' in kubeadm_output.stdout"

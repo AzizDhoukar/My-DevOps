@@ -1,0 +1,60 @@
+---
+- hosts: k8s-workers
+  become: true
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - socat
+        state: present
+        update_cache: yes
+
+    - name: install Docker
+      apt:
+        name: docker.io
+        state: latest
+
+    - name: making the keyrings folder
+      command: mkdir -p /etc/apt/keyrings
+      
+    - name: Add Kubernetes apt key
+      apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
+        state: present
+
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: "deb https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
+        state: present
+
+    - name: Install kubeadm, kubelet, and kubectl
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
+
+    - name: Hold the Kubernetes packages at the current version
+      apt:
+        name:
+          - kubeadm
+          - kubelet
+          - kubectl
+        state: fixed
+
+    - name: Read token output from local file
+      set_fact:
+        token: "{{ lookup('file', 'k8s_token.txt') }}"
+
+    - name: Display the token
+      debug:
+        msg: "The token is: {{ token }}"
+
+    - name: Connect to the cluster
+      command: sudo {{ token }}
