@@ -1,1 +1,0 @@
-kubeadm join 10.0.10.56:6443 --token ol9nnr.oepbxztgrw6q50fu --discovery-token-ca-cert-hash sha256:a3680d91b1e719c9f742b53e4577d1fefb87a5baba6c207f8b4bd586bc195b18 
