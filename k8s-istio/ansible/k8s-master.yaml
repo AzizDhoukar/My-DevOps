@@ -92,3 +92,6 @@
         - sudo mkdir -p /home/{{ ansible_user }}/.kube
         - sudo cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
         - sudo chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
+
+    - name: Install Calico network plugin
+      command: kubectl apply -f https://docs.projectcalico.org/v3.25/manifests/calico.yaml
