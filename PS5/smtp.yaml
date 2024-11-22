@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smtp-service
+  namespace: ps5
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smtp-service
+  template:
+    metadata:
+      labels:
+        app: smtp-service
+    spec:
+      containers:
+      - name: smtp-service
+        image: your-registry/smtp-service:latest
+        ports:
+        - containerPort: 25
+        env:
+        - name: SMTP_SERVER
+          value: "smtp.example.com"
+        - name: SMTP_PORT
+          value: "25"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smtp-service
+  namespace: ps5
+spec:
+  selector:
+    app: smtp-service
+  ports:
+    - protocol: TCP
+      port: 25
+      targetPort: 25
+  type: ClusterIP
