@@ -16,6 +16,7 @@ spec:
       containers:
       - name: order-service
         image: azizdhoukar/ps5:Order
+        #imagePullPolicy: Always
         ports:
         - containerPort: 8083
         env:
@@ -40,4 +41,5 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8083
-  type: ClusterIP
+      nodePort: 30003  
+  type: NodePort

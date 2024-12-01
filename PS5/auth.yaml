@@ -16,6 +16,7 @@ spec:
       containers:
       - name: auth
         image: azizdhoukar/ps5:Authentication-0.1
+        #imagePullPolicy: Always
         ports:
         - containerPort: 8088
         env:
@@ -43,5 +44,5 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8088
-      nodePort: 30001  
+      nodePort: 30008  
   type: NodePort

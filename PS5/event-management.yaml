@@ -16,6 +16,7 @@ spec:
       containers:
       - name: event-management-service
         image: azizdhoukar/ps5:EventManagement-0.1
+        #imagePullPolicy: Always
         ports:
         - containerPort: 8089
         env:
@@ -40,4 +41,5 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8089
-  type: ClusterIP
+      nodePort: 30009  
+  type: NodePort
