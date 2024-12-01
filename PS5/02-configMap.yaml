@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: ps5
+data:
+  init.sql: |
+    CREATE DATABASE auth;
+    CREATE DATABASE event;
+    CREATE DATABASE Test2_DB;
+    CREATE DATABASE grpcmsg;
