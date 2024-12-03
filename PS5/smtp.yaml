@@ -18,6 +18,9 @@ spec:
         image: your-registry/smtp-service:latest
         ports:
         - containerPort: 25
+        envFrom:
+        - configMapRef:
+            name: global-env-config
         env:
         - name: SMTP_SERVER
           value: "smtp.example.com"

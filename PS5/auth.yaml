@@ -19,17 +19,9 @@ spec:
         #imagePullPolicy: Always
         ports:
         - containerPort: 8088
-        env:
-        - name: POSTGRES_USER
-          value: root
-        - name: POSTGRES_PASSWORD
-          value: admin
-        - name: POSTGRES_DB
-          value: auth
-        - name: POSTGRES_HOST
-          value: postgres
-        - name: POSTGRES_PORT
-          value: "5432"
+        envFrom:
+        - configMapRef:
+            name: global-env-config
 
 ---
 apiVersion: v1

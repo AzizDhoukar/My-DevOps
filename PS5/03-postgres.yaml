@@ -16,17 +16,19 @@ spec:
       containers:
       - name: postgres
         image: postgres:17
-        env:
-        - name: POSTGRES_USER
-          value: root
-        - name: POSTGRES_PASSWORD
-          value: admin
+
+        envFrom:
+        - configMapRef:
+            name: global-env-config
+
         ports:
         - containerPort: 5432
+
         volumeMounts:
         - name: init-scripts
           mountPath: /docker-entrypoint-initdb.d
           readOnly: true
+          
       volumes:
       - name: init-scripts
         configMap:
