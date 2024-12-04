@@ -94,6 +94,9 @@
         - sudo cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
         - chown $(id -u):$(id -g) /home/{{ ansible_user }}/.kube/config
 
-    - name: Install Calico network plugin
-      command: kubectl apply -f https://docs.projectcalico.org/v3.25/manifests/calico.yaml
-      when: "'calico' in kubeadm_output.stdout"
+    # - name: Install Calico network plugin
+    #   command: kubectl apply -f https://docs.projectcalico.org/v3.25/manifests/calico.yaml
+    #   when: "'calico' in kubeadm_output.stdout"
+
+    - name: Install a Container Network Interface (CNI)
+      command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
