@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: smtp-service
-        image: your-registry/smtp-service:latest
+        image: azizdhoukar/ps5:MQ
+        imagePullPolicy: Always
         ports:
         - containerPort: 25
         envFrom:

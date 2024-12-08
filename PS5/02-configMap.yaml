@@ -27,5 +27,6 @@ data:
   BOOKING_PORT: "80"
   EVENT_SERVICE: event
   EVENT_PORT: "80"
-  ORDER_SERVICE: order
+  ORDER_SERVICE: order-service
   ORDER_PORT: "80"
+  ORDER_GRPC_PORT: "50050"

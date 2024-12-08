@@ -18,7 +18,10 @@ spec:
         image: azizdhoukar/ps5:Order
         #imagePullPolicy: Always
         ports:
-        - containerPort: 8083
+        - name: http
+          containerPort: 8083
+        - name: grpc
+          containerPort: 50050
         envFrom:
         - configMapRef:
             name: global-env-config
@@ -32,8 +35,14 @@ spec:
   selector:
     app: order-service
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: 8083
-      nodePort: 30003  
+      nodePort: 30003
+    - name: grpc
+      protocol: TCP
+      port: 50050
+      targetPort: 50050
+      nodePort: 30053
   type: NodePort

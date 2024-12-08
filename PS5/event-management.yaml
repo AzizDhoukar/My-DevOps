@@ -16,7 +16,7 @@ spec:
       containers:
       - name: event-management-service
         image: azizdhoukar/ps5:EventManagement-0.1
-        #imagePullPolicy: Always
+        imagePullPolicy: Always
         ports:
         - containerPort: 8089
         envFrom:
