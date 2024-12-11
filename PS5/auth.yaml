@@ -16,7 +16,7 @@ spec:
       containers:
       - name: auth
         image: azizdhoukar/ps5:Authentication-0.1
-        #imagePullPolicy: Always
+        imagePullPolicy: Always
         ports:
         - containerPort: 8088
         envFrom:
